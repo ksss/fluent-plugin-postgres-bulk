@@ -19,8 +19,6 @@ module Fluent::Plugin
       desc: "Bulk insert table."
     config_param :column_names, :string,
       desc: "Bulk insert column."
-    config_param :on_conflict, :string, default: nil,
-      desc: "Insert ON CLUFLICT after INSERT INTO."
 
     def initialize
       super
@@ -59,9 +57,6 @@ module Fluent::Plugin
         values << "(#{cols})"
       }
       sql = "INSERT INTO #{@table} (#{@column_names_joined}) VALUES #{values.join(',')}".dup
-      if @on_conflict
-        sql << " ON CONFLICT #{@on_conflict}"
-      end
       handler.exec(sql)
       handler.close
     end
