@@ -50,10 +50,9 @@ module Fluent::Plugin
       handler = client
       values = []
       chunk.each { |time, record|
-        cols = record.map { |k, v| @column_names_map.key?(k) ? v : nil }
-                       .compact
-                       .map { |v| "'#{v}'" }
-                       .join(',')
+        cols = record.select { |k, v| @column_names_map.key?(k) }
+                     .map { |_k, v| "'#{v}'" }
+                     .join(',')
         values << "(#{cols})"
       }
       sql = "INSERT INTO #{@table} (#{@column_names_joined}) VALUES #{values.join(',')}".dup
