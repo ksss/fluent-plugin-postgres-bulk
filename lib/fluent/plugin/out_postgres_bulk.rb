@@ -27,9 +27,8 @@ module Fluent::Plugin
 
     def configure(conf)
       super
-      column_names_ary = @column_names.split(',').map(&:strip).reject(&:empty?)
-      @column_names_joined = column_names_ary.join(',')
-      @column_names_map = column_names_ary.map { |c| [c, true] }.to_h
+      @column_names_ary = @column_names.split(',').map(&:strip).reject(&:empty?)
+      @column_names_joined = @column_names_ary.join(',')
     end
 
     def client
@@ -50,13 +49,22 @@ module Fluent::Plugin
       handler = client
       values = []
       chunk.each { |time, record|
-        cols = record.select { |k, v| @column_names_map.key?(k) }
-                     .map { |_k, v| "'#{v}'" }
-                     .join(',')
-        values << "(#{cols})"
+        v = @column_names_ary.map { |k|
+          record[k]
+        }.compact
+        values.push(*v)
       }
-      sql = "INSERT INTO #{@table} (#{@column_names_joined}) VALUES #{values.join(',')}".dup
-      handler.exec(sql)
+      place_holders = values.each_slice(@column_names_ary.length)
+                            .map
+                            .with_index { |cols, i|
+                              params = cols.map.with_index { |c, j|
+                                "$#{i * cols.length + j + 1}"
+                              }
+                              "(#{params.join(',')})"
+                            }.join(',')
+      query = "INSERT INTO #{@table} (#{@column_names_joined}) VALUES #{place_holders}"
+      handler.prepare("write", query)
+      handler.exec_prepared("write", values)
       handler.close
     end
   end
