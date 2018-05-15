@@ -27,8 +27,7 @@ module Fluent::Plugin
 
     def configure(conf)
       super
-      @column_names_ary = @column_names.split(',').map(&:strip).reject(&:empty?)
-      @column_names_joined = @column_names_ary.join(',')
+      @column_names_ary = @column_names.split(',').map(&:strip)
     end
 
     def client
@@ -46,7 +45,20 @@ module Fluent::Plugin
     end
 
     def write(chunk)
-      handler = client
+      handler = client()
+      begin
+        values = build_values(chunk)
+        place_holders = build_place_holders(values)
+        query = "INSERT INTO #{@table} (#{@column_names}) VALUES #{place_holders}"
+        handler.exec_params(query, values)
+      ensure
+        handler.close
+      end
+    end
+
+    private
+
+    def build_values(chunk)
       values = []
       chunk.each { |time, record|
         v = @column_names_ary.map { |k|
@@ -54,18 +66,18 @@ module Fluent::Plugin
         }
         values.push(*v)
       }
-      place_holders = values.each_slice(@column_names_ary.length)
-                            .map
-                            .with_index { |cols, i|
-                              params = cols.map.with_index { |c, j|
-                                "$#{i * cols.length + j + 1}"
-                              }
-                              "(#{params.join(',')})"
-                            }.join(',')
-      query = "INSERT INTO #{@table} (#{@column_names_joined}) VALUES #{place_holders}"
-      handler.prepare("write", query)
-      handler.exec_prepared("write", values)
-      handler.close
+      values
+    end
+
+    def build_place_holders(values)
+      values.each_slice(@column_names_ary.length)
+            .map
+            .with_index { |cols, i|
+              params = cols.map.with_index { |c, j|
+                "$#{i * cols.length + j + 1}"
+              }
+              "(#{params.join(',')})"
+            }.join(',')
     end
   end
 end
