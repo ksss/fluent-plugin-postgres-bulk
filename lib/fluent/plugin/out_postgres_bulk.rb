@@ -51,7 +51,7 @@ module Fluent::Plugin
       chunk.each { |time, record|
         v = @column_names_ary.map { |k|
           record[k]
-        }.compact
+        }
         values.push(*v)
       }
       place_holders = values.each_slice(@column_names_ary.length)
