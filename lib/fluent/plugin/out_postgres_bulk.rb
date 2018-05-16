@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 require 'fluent/plugin/output'
+require 'benchmark'
 
 module Fluent::Plugin
   class PostgresBulkOutput < Output
+    # number of parameters must be between 0 and 65535
+    N_PARAMETER_MAX = 65535
     Fluent::Plugin.register_output('postgres_bulk', self)
 
     config_param :host, :string, default: '127.0.0.1',
@@ -41,14 +44,18 @@ module Fluent::Plugin
 
     def write(chunk)
       handler = client()
-      begin
-        values = build_values(chunk)
-        place_holders = build_place_holders(values)
+      values = build_values(chunk)
+      max_slice = N_PARAMETER_MAX / @column_names.length * @column_names.length
+      values.each_slice(max_slice) do |slice|
+        place_holders = build_place_holders(slice)
         query = "INSERT INTO #{@table} (#{@column_names.join(',')}) VALUES #{place_holders}"
-        handler.exec_params(query, values)
-      ensure
-        handler.close
+        t = Benchmark.realtime {
+          handler.exec_params(query, slice)
+        }
+        @log.debug("inserted #{values.length / @column_names.length} records in #{(t * 1000).to_i} ms")
       end
+    ensure
+      handler.close
     end
 
     private
