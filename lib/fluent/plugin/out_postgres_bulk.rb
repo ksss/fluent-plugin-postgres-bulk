@@ -17,17 +17,12 @@ module Fluent::Plugin
       desc: "Database password."
     config_param :table, :string,
       desc: "Bulk insert table."
-    config_param :column_names, :string,
+    config_param :column_names, :array,
       desc: "Bulk insert column."
 
     def initialize
       super
       require 'pg'
-    end
-
-    def configure(conf)
-      super
-      @column_names_ary = @column_names.split(',').map(&:strip)
     end
 
     def client
@@ -49,7 +44,7 @@ module Fluent::Plugin
       begin
         values = build_values(chunk)
         place_holders = build_place_holders(values)
-        query = "INSERT INTO #{@table} (#{@column_names}) VALUES #{place_holders}"
+        query = "INSERT INTO #{@table} (#{@column_names.join(',')}) VALUES #{place_holders}"
         handler.exec_params(query, values)
       ensure
         handler.close
@@ -61,7 +56,7 @@ module Fluent::Plugin
     def build_values(chunk)
       values = []
       chunk.each { |time, record|
-        v = @column_names_ary.map { |k|
+        v = @column_names.map { |k|
           record[k]
         }
         values.push(*v)
@@ -70,7 +65,7 @@ module Fluent::Plugin
     end
 
     def build_place_holders(values)
-      values.each_slice(@column_names_ary.length)
+      values.each_slice(@column_names.length)
             .map
             .with_index { |cols, i|
               params = cols.map.with_index { |c, j|
