@@ -53,7 +53,7 @@ Database user.
 
 Database password.
 
-Default value: ``.
+Default value: `(empty)`.
 
 ### table (string) (required)
 
