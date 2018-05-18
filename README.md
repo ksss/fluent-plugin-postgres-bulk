@@ -63,19 +63,26 @@ Bulk insert table.
 
 Bulk insert column.
 
-# Install
+# Installation
 
-In case of using Bundler,
-you can install this plugin by writing to Gemfile.
-
-```
-gem "fluent-plugin-postgres-bulk"
-```
-
-or use gem command
+## RubyGems
 
 ```
 $ gem install fluent-plugin-postgres-bulk
+```
+
+## Bundler
+
+Add following line to your Gemfile:
+
+```ruby
+gem "fluent-plugin-postgres-bulk"
+```
+
+And then execute:
+
+```
+$ bundle
 ```
 
 # Require
