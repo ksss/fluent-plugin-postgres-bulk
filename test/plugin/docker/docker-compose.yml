@@ -1,0 +1,23 @@
+version: "3"
+services:
+
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - '5432:5432'
+
+  fluentd:
+    build:
+      context: .
+      dockerfile: Dockerfile-fluentd
+    environment:
+      FLUENTD_OPT: -v --gemfile /fluentd/etc/Gemfile
+    ports:
+      - '24224:24224'

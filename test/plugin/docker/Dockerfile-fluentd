@@ -1,0 +1,11 @@
+FROM fluent/fluentd:v1.2
+
+RUN apk add --update --virtual .build-deps sudo build-base ruby-dev \
+    ruby-bundler postgresql-dev
+COPY Gemfile* /fluentd/etc/
+RUN cd /fluentd/etc \
+  && bundle install -j4 \
+    --deployment \
+    --path /fluent/etc/vender/bundle
+COPY fluent.conf /fluentd/etc/fluent.conf
+COPY plugins /fluentd/plugins/

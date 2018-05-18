@@ -17,4 +17,5 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "pg"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "test-unit"
+  gem.add_development_dependency "fluent-logger"
 end

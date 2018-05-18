@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+
+gem "fluentd", "1.2.0"
+gem "fluent-plugin-record-modifier"
+gem "json"
+gem "pg"
