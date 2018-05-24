@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name          = "fluent-plugin-postgres-bulk"
-  gem.version       = "0.0.1"
+  gem.version       = "0.1.0"
   gem.authors       = ["ksss"]
   gem.email         = ["co000ri@gmail.com"]
   gem.description   = %q{fluent plugin for bulk insert to postgres}
