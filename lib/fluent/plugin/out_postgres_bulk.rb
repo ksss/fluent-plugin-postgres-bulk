@@ -52,7 +52,7 @@ module Fluent::Plugin
         t = Benchmark.realtime {
           handler.exec_params(query, slice)
         }
-        @log.debug("inserted #{values.length / @column_names.length} records in #{(t * 1000).to_i} ms")
+        log.info("(table: #{table}) inserted #{values.length / @column_names.length} records in #{(t * 1000).to_i} ms")
       end
     ensure
       handler.close
