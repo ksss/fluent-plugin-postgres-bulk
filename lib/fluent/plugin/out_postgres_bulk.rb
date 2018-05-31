@@ -55,7 +55,7 @@ module Fluent::Plugin
         log.info("(table: #{table}) inserted #{values.length / @column_names.length} records in #{(t * 1000).to_i} ms")
       end
     ensure
-      handler.close
+      handler&.close
     end
 
     private
