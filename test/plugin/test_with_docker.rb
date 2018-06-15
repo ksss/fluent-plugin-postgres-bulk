@@ -7,7 +7,7 @@ require 'fluent-logger'
 require 'pg'
 
 class WithDockerTest < Test::Unit::TestCase
-  def connect_pg(count = 1, limit = 10)
+  def connect_pg(count = 1, limit = 20)
     PG.connect(
       host: URI.parse(ENV["DOCKER_HOST"]).hostname,
       port: 5432,
@@ -19,13 +19,14 @@ class WithDockerTest < Test::Unit::TestCase
     if count <= limit
       puts "connect_pg => retry"
       sleep 1
-      connect_pg(count + 1, limit)
+      count += 1
+      retry
     else
       raise
     end
   end
 
-  def connect_fluentd(count = 1, limit = 10)
+  def connect_fluentd(count = 1, limit = 20)
     Fluent::Logger.open(
       Fluent::Logger::FluentLogger,
       "test",
