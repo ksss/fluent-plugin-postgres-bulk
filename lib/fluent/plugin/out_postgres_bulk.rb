@@ -8,6 +8,8 @@ module Fluent::Plugin
     N_PARAMETER_MAX = 65535
     Fluent::Plugin.register_output('postgres_bulk', self)
 
+    helpers :inject
+
     config_param :host, :string, default: '127.0.0.1',
       desc: "Database host."
     config_param :port, :integer, default: 5432,
@@ -42,6 +44,15 @@ module Fluent::Plugin
       true
     end
 
+    def formatted_to_msgpack_binary
+      true
+    end
+
+    def format(tag, time, record)
+      record = inject_values_to_record(tag, time, record)
+      [tag, time, record].to_msgpack
+    end
+
     def write(chunk)
       handler = client()
       values = build_values(chunk)
@@ -62,12 +73,12 @@ module Fluent::Plugin
 
     def build_values(chunk)
       values = []
-      chunk.each { |time, record|
+      chunk.each do |_tag, _time, record|
         v = @column_names.map { |k|
           record[k]
         }
         values.push(*v)
-      }
+      end
       values
     end
 
