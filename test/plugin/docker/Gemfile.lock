@@ -17,7 +17,7 @@ GEM
       tzinfo-data (~> 1.0)
       yajl-ruby (~> 1.0)
     http_parser.rb (0.6.0)
-    json (2.1.0)
+    json (2.3.0)
     msgpack (1.2.4)
     pg (1.0.0)
     serverengine (2.0.6)
